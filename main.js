@@ -14,7 +14,7 @@ const SERVER_URL = 'https://designerhub.shardweb.app';
 // ============================================================
 //  SUPORTE  —  TROQUE pelo SEU numero de WhatsApp (so digitos,
 //  com o codigo do Brasil 55 na frente).  Ex: 5511999998888
-const SUPPORT_WHATSAPP = '5500000000000';
+const SUPPORT_WHATSAPP = '5537999942029';
 // ============================================================
 
 const BACKUP_DIR  = path.join(app.getPath('documents'), 'Designer Hub - Backups');
