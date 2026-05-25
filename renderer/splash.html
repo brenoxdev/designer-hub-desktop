@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Designer Hub</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body {
+    background: radial-gradient(560px 300px at 50% 38%, #181206, #07070a 70%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #ececf1; user-select: none; cursor: default;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 16px;
+  }
+
+  /* ----- logo + brilho ----- */
+  .stage { position: relative; width: 150px; height: 132px; display: flex; align-items: center; justify-content: center; }
+  .glow {
+    position: absolute; width: 230px; height: 230px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,206,115,.42), rgba(255,206,115,0) 68%);
+    opacity: 0; animation: glowIn .7s ease-out .1s forwards, glowPulse 2.4s ease-in-out 1.1s infinite;
+  }
+  .logo {
+    height: 108px; width: auto; position: relative;
+    opacity: 0; transform: scale(.45) rotate(-12deg);
+    animation: logoIn .8s cubic-bezier(.18,.9,.22,1.2) .12s forwards, float 3s ease-in-out 1.1s infinite;
+    filter: drop-shadow(0 8px 26px rgba(255,206,115,.4));
+  }
+  @keyframes logoIn { to { opacity: 1; transform: scale(1) rotate(0deg); } }
+  @keyframes float { 0%,100% { translate: 0 0; } 50% { translate: 0 -6px; } }
+  @keyframes glowIn { to { opacity: 1; } }
+  @keyframes glowPulse { 0%,100% { opacity: .55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.12); } }
+
+  /* faiscas */
+  .spark {
+    position: absolute; width: 5px; height: 5px; border-radius: 50%;
+    background: #FFCE73; box-shadow: 0 0 8px #FFCE73; opacity: 0;
+  }
+  .s1 { left: 14%; top: 60%; animation: spark 1.9s ease-out 1.2s infinite; }
+  .s2 { left: 84%; top: 52%; animation: spark 2.1s ease-out 1.6s infinite; }
+  .s3 { left: 24%; top: 24%; animation: spark 2.3s ease-out 2s infinite; }
+  .s4 { left: 78%; top: 22%; animation: spark 2s ease-out 1.4s infinite; }
+  .s5 { left: 50%; top: 8%;  animation: spark 2.2s ease-out 2.3s infinite; }
+  @keyframes spark {
+    0% { opacity: 0; transform: translateY(8px) scale(.4); }
+    35% { opacity: 1; transform: translateY(-6px) scale(1); }
+    100% { opacity: 0; transform: translateY(-26px) scale(.3); }
+  }
+
+  /* ----- texto ----- */
+  .title {
+    font-size: 27px; font-weight: 800; letter-spacing: -.5px;
+    background: linear-gradient(100deg, #ffe6b8, #FFCE73 55%, #ffb347);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    opacity: 0; transform: translateY(8px);
+    animation: up .55s ease-out .62s forwards;
+  }
+  .sub {
+    font-size: 11.5px; color: #8a8275; letter-spacing: .4px; min-height: 15px;
+    opacity: 0; animation: up .55s ease-out .82s forwards;
+  }
+  @keyframes up { to { opacity: 1; transform: translateY(0); } }
+
+  /* ----- barra ----- */
+  .bar {
+    width: 188px; height: 4px; border-radius: 3px; overflow: hidden;
+    background: #211a0c; margin-top: 3px;
+    opacity: 0; animation: up .5s ease-out .95s forwards;
+  }
+  .bar span {
+    display: block; height: 100%; width: 42%;
+    background: linear-gradient(90deg, transparent, #FFCE73, #ffe6b8, transparent);
+    animation: slide 1.3s ease-in-out infinite;
+  }
+  @keyframes slide { 0% { transform: translateX(-130%); } 100% { transform: translateX(320%); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .logo, .glow, .spark, .title, .sub, .bar { animation-duration: .01s; opacity: 1; }
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="glow"></div>
+    <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span>
+    <span class="spark s4"></span><span class="spark s5"></span>
+    <svg class="logo" viewBox="0 0 479 540" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="shine" x1="-0.6" y1="0" x2="0.4" y2="0">
+          <stop offset="0" stop-color="#FFCE73"/>
+          <stop offset="0.42" stop-color="#FFCE73"/>
+          <stop offset="0.5" stop-color="#FFF6DF"/>
+          <stop offset="0.58" stop-color="#FFCE73"/>
+          <stop offset="1" stop-color="#FFCE73"/>
+          <animate attributeName="x1" values="-0.6;1.0" dur="1.7s" begin="1.1s" repeatCount="indefinite"/>
+          <animate attributeName="x2" values="0.4;2.0" dur="1.7s" begin="1.1s" repeatCount="indefinite"/>
+        </linearGradient>
+        <clipPath id="reveal">
+          <rect x="0" y="540" width="479" height="540">
+            <animate attributeName="y" from="540" to="0" dur="0.85s" begin="0.2s"
+                     fill="freeze" calcMode="spline" keySplines="0.2 0 0 1"/>
+          </rect>
+        </clipPath>
+      </defs>
+      <g clip-path="url(#reveal)" fill="url(#shine)">
+        <path d="M0 72.4802V0.781458L239.517 0L344.037 74.8246V201.811H478.057V370.802L404.795 421.987V274.878H309.848L266.086 303.987H208.063V359.47L135.778 307.308V206.305H73.457V331.729L239.126 449.143L269.212 428.043V358.494L343.841 308.09V465.553L238.54 539.401L0 369.043V134.606H208.649V231.702H269.408V114.874L211.58 72.4802H0Z"/>
+        <rect x="404.599" y="0.195312" width="74.2385" height="141.053"/>
+      </g>
+    </svg>
+  </div>
+  <div class="title">Designer Hub</div>
+  <div class="sub" id="sub">Iniciando o sistema...</div>
+  <div class="bar"><span></span></div>
+  <script>
+    var msgs = ['Iniciando o sistema...', 'Conectando ao servidor...', 'Quase la...'];
+    var i = 0;
+    setInterval(function () {
+      i = (i + 1) % msgs.length;
+      document.getElementById('sub').textContent = msgs[i];
+    }, 1400);
+  </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{
+  "name": "designer-hub-desktop",
+  "version": "1.3.0",
+  "description": "App desktop do Designer Hub - janela propria + backup local automatico",
+  "main": "main.js",
+  "author": "Brenox",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "publish": "electron-builder --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^31.7.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.designerhub.app",
+    "productName": "Designer Hub",
+    "files": ["main.js", "preload.js", "renderer/**/*"],
+    "directories": { "output": "dist", "buildResources": "build" },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "brenoxdev",
+        "repo": "designer-hub-desktop"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico",
+      "artifactName": "DesignerHub-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.png",
+      "category": "public.app-category.productivity",
+      "artifactName": "DesignerHub-${version}.${ext}"
+    }
+  }
+}

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Designer Hub - Modo offline</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #07070a; color: #ececf1;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh; padding: 28px; font-size: 14px;
+  }
+  .wrap { max-width: 680px; margin: 12px auto 0; }
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #15151c; border: 1px solid #25252f; border-radius: 12px;
+    padding: 14px 18px; margin-bottom: 14px;
+  }
+  .topbar .st { display: flex; align-items: center; gap: 9px; font-weight: 600; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #ff5566; }
+  .dot.on { background: #2ecc71; }
+  h1 { font-size: 19px; font-weight: 700; }
+  .sub { color: #7a7a8a; font-size: 12px; margin-top: 2px; }
+  .card {
+    background: #0e0e12; border: 1px solid #25252f; border-radius: 14px;
+    padding: 20px; margin-bottom: 14px;
+  }
+  .card h2 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .card p.hint { color: #7a7a8a; font-size: 12px; margin-bottom: 14px; }
+  label { display: block; font-size: 11px; color: #7a7a8a; text-transform: uppercase;
+    letter-spacing: .7px; font-weight: 600; margin: 10px 0 5px; }
+  input, select, textarea {
+    width: 100%; background: #15151c; border: 1px solid #25252f; color: #ececf1;
+    padding: 10px 12px; border-radius: 9px; outline: none; font-size: 13px; font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus { border-color: #7c5cff; }
+  button {
+    border: 0; border-radius: 9px; cursor: pointer; font-weight: 600; font-size: 13px;
+    padding: 10px 16px; transition: transform .1s;
+  }
+  button:hover { transform: translateY(-1px); }
+  .primary { background: linear-gradient(135deg,#7c5cff,#a685ff); color: #fff; }
+  .ghost { background: transparent; border: 1px solid #25252f; color: #ececf1; }
+  .grid { display: grid; grid-template-columns: 1.5fr .6fr .9fr 1fr auto; gap: 6px; }
+  .grid input, .grid select { font-size: 12px; padding: 8px 9px; }
+  .grid button { font-size: 12px; padding: 8px 12px; white-space: nowrap; }
+  .list { display: flex; flex-direction: column; gap: 5px; margin: 8px 0; }
+  .item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #15151c; border: 1px solid #25252f; border-radius: 8px; padding: 8px 11px; font-size: 12px;
+  }
+  .item .x { background: transparent; border: 0; color: #ff5566; font-size: 15px; padding: 0 4px; }
+  .empty { color: #7a7a8a; font-size: 12px; padding: 8px 0; }
+  .queue-item { border-color: #3a3320; }
+  .badge-q { background: rgba(245,196,81,.15); color: #f5c451; font-size: 10px;
+    padding: 2px 7px; border-radius: 5px; font-weight: 700; }
+  .row-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .wa-support { border-color: #1f7a3f !important; color: #25d366 !important; }
+  .wa-support:hover { background: rgba(37,211,102,.12); }
+  .msg { font-size: 12px; margin-top: 8px; min-height: 16px; }
+  .msg.ok { color: #2ecc71; } .msg.err { color: #ff5566; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <h1>Modo offline</h1>
+      <p class="sub">Sem conexao com o servidor. Voce pode continuar cadastrando — tudo sera enviado quando a internet voltar.</p>
+    </div>
+    <div class="st"><span class="dot" id="conn-dot"></span><span id="conn-text">Offline</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Fila de envio</h2>
+    <p class="hint" id="queue-info">Nenhum cadastro aguardando.</p>
+    <div class="list" id="queue-list"></div>
+    <div class="row-actions">
+      <button class="ghost" id="btn-retry">Tentar conectar</button>
+      <button class="primary" id="btn-sync">Sincronizar agora</button>
+      <button class="ghost" id="btn-backups">Abrir backups</button>
+      <button class="ghost wa-support" id="btn-support">💬 Suporte</button>
+    </div>
+    <div class="msg" id="sync-msg"></div>
+  </div>
+
+  <div class="card">
+    <h2>Cadastrar trabalho offline</h2>
+    <p class="hint">Registre o cliente, o paciente e as proteses. Fica salvo no seu computador e sobe sozinho ao reconectar.</p>
+    <form id="off-form">
+      <label>Cliente (dentista)</label>
+      <select id="off-client"></select>
+      <div id="new-client-fields" style="display:none;">
+        <label>Nome do novo cliente</label>
+        <input id="off-client-name" placeholder="Ex: Dr. Lucas" />
+        <label>Telefone (opcional)</label>
+        <input id="off-client-phone" placeholder="(11) 99999-9999" />
+      </div>
+
+      <label>Nome do paciente *</label>
+      <input id="off-patient" required />
+
+      <label>Proteses</label>
+      <div class="list" id="off-pros-list"></div>
+      <div class="grid">
+        <input id="op-type" placeholder="Tipo (Coroa, Fixa...)" />
+        <input id="op-qty" type="number" min="1" value="1" title="Qtd" />
+        <input id="op-unit" type="number" step="0.01" min="0" placeholder="Valor unit." />
+        <select id="op-status">
+          <option value="pendente">Pendente</option><option value="pago">Pago</option>
+          <option value="atrasado">Atrasado</option>
+        </select>
+        <button type="button" class="ghost" id="op-add">+ Add</button>
+      </div>
+
+      <label>Observacoes</label>
+      <textarea id="off-notes" rows="2"></textarea>
+
+      <div class="row-actions">
+        <button type="submit" class="primary">Salvar na fila</button>
+      </div>
+      <div class="msg" id="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  let pros = [];
+
+  function brl(n){ return (Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+
+  async function loadCache() {
+    const cache = await window.brenox.getCache();
+    const sel = $('#off-client');
+    sel.innerHTML = '<option value="__new__">+ Novo cliente</option>';
+    (cache.clients || []).forEach(c => {
+      const o = document.createElement('option');
+      o.value = String(c.id); o.textContent = c.name;
+      sel.appendChild(o);
+    });
+  }
+  $('#off-client').addEventListener('change', () => {
+    $('#new-client-fields').style.display = $('#off-client').value === '__new__' ? '' : 'none';
+  });
+
+  function renderPros() {
+    const box = $('#off-pros-list');
+    box.innerHTML = pros.length ? '' : '<div class="empty">Nenhuma protese adicionada.</div>';
+    pros.forEach((p, i) => {
+      const d = document.createElement('div');
+      d.className = 'item';
+      d.innerHTML = '<span><strong>'+p.type+'</strong> &middot; '+p.quantity+'x '+brl(p.unit_value)+' = '+brl(p.quantity*p.unit_value)+' &middot; '+p.status+'</span>'
+        + '<button type="button" class="x" data-i="'+i+'">&times;</button>';
+      box.appendChild(d);
+    });
+    $$('#off-pros-list .x').forEach(b => b.addEventListener('click', () => { pros.splice(+b.dataset.i,1); renderPros(); }));
+  }
+  // adiciona a protese digitada. silent=true: usado ao salvar, pra incluir o que
+  // foi digitado mesmo sem ter clicado em "+ Add".
+  function addPendingPros() {
+    const type = $('#op-type').value.trim();
+    if (!type) return false;
+    pros.push({
+      type, quantity: Math.max(1, parseInt($('#op-qty').value,10)||1),
+      unit_value: parseFloat($('#op-unit').value)||0, status: $('#op-status').value,
+      work_date: new Date().toISOString().slice(0,10)
+    });
+    $('#op-type').value=''; $('#op-qty').value='1'; $('#op-unit').value='';
+    renderPros();
+    return true;
+  }
+  $('#op-add').addEventListener('click', addPendingPros);
+
+  async function renderQueue() {
+    const q = await window.brenox.getOutbox();
+    $('#queue-info').textContent = q.length
+      ? q.length + ' cadastro(s) aguardando envio.'
+      : 'Nenhum cadastro aguardando.';
+    const box = $('#queue-list');
+    box.innerHTML = '';
+    q.forEach(e => {
+      const d = document.createElement('div');
+      d.className = 'item queue-item';
+      d.innerHTML = '<span><span class="badge-q">FILA</span> &nbsp;'
+        + (e.patient_name||'?') + ' &middot; ' + (e.prosthetics ? e.prosthetics.length : 0) + ' protese(s)</span>'
+        + '<button type="button" class="x" data-id="'+e.id+'">&times;</button>';
+      box.appendChild(d);
+    });
+    $$('#queue-list .x').forEach(b => b.addEventListener('click', async () => {
+      await window.brenox.removeOffline(+b.dataset.id);
+      renderQueue();
+    }));
+  }
+
+  $('#off-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = $('#form-msg'); msg.textContent=''; msg.className='msg';
+    const patient = $('#off-patient').value.trim();
+    if (!patient) { msg.textContent='Informe o nome do paciente.'; msg.className='msg err'; return; }
+    addPendingPros(); // inclui a protese digitada sem ter clicado em "+ Add"
+    const sel = $('#off-client').value;
+    const entry = {
+      patient_name: patient,
+      notes: $('#off-notes').value.trim(),
+      prosthetics: pros.slice()
+    };
+    if (sel === '__new__') {
+      const cn = $('#off-client-name').value.trim();
+      if (!cn) { msg.textContent='Informe o nome do novo cliente.'; msg.className='msg err'; return; }
+      entry.client_id = null;
+      entry.client_name = cn;
+      entry.client_phone = $('#off-client-phone').value.trim();
+    } else {
+      entry.client_id = parseInt(sel,10);
+    }
+    await window.brenox.saveOffline(entry);
+    msg.textContent = 'Cadastro salvo na fila! Sera enviado quando a internet voltar.';
+    msg.className = 'msg ok';
+    $('#off-form').reset();
+    pros = []; renderPros();
+    $('#new-client-fields').style.display = 'none';
+    renderQueue();
+  });
+
+  $('#btn-retry').addEventListener('click', () => window.brenox.retry());
+  $('#btn-backups').addEventListener('click', () => window.brenox.openBackups());
+  $('#btn-support').addEventListener('click', () => window.brenox.openSupport());
+  $('#btn-sync').addEventListener('click', async () => {
+    const msg = $('#sync-msg'); msg.textContent='Verificando conexao...'; msg.className='msg';
+    const r = await window.brenox.syncNow();
+    if (!r.online) { msg.textContent='Ainda sem conexao. Tente novamente em instantes.'; msg.className='msg err'; }
+    else { msg.textContent='Conexao OK! Sincronizando...'; msg.className='msg ok'; }
+  });
+
+  renderPros();
+  renderQueue();
+  loadCache();
+</script>
+</body>
+</html>
